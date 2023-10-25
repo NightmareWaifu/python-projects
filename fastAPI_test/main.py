@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Path
+from fastapi import FastAPI, Path, Query
 from typing import Optional
-
+from pydantic import BaseModel
 app = FastAPI()
 
 inventory = {
@@ -10,6 +10,14 @@ inventory = {
         "brand": "Regular"
             }
 }
+
+class Item(BaseModel):
+    name: str
+    price: float
+    brand: Optional[str] = None #you can also set it as a default value
+
+
+
 
 @app.get("/")
 def home():
@@ -36,5 +44,8 @@ def get_by_name(name: str):
         
     return {"Data": "Not found"}
 
+@app.post("/create-item")
+def create_item(item: Item):
+    return {}
 
 #progress 35mins at request body and POST methods
