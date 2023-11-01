@@ -4,11 +4,6 @@ from pydantic import BaseModel
 app = FastAPI()
 
 inventory = {
-    1: {
-        "name": "Milk",
-        "price": 3.99,
-        "brand": "Regular"
-            }
 }
 
 class Item(BaseModel):
@@ -39,13 +34,16 @@ def get_item_mp(*, item_id: int, name: Optional[str] = None): #Optional[str] = N
 @app.get("/get-by-name") #/get-by-name?name=<name>
 def get_by_name(name: str):
     for item_id in inventory:
-        if inventory[item_id]["name"] == name:
+        if inventory[item_id].name == name:
             return inventory[item_id]
         
     return {"Data": "Not found"}
 
-@app.post("/create-item")
-def create_item(item: Item):
-    return {}
+@app.post("/create-item/{item_id}")
+def create_item(item_id: int, item: Item):
+    if item_id in inventory:
+        return {"Error": "Item already exists"}
+    inventory[item_id] = item
+    return inventory[item_id]
 
 #progress 35mins at request body and POST methods
