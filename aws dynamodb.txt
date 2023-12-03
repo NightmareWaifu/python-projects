@@ -1,0 +1,60 @@
+import boto3
+import uuid
+import os
+
+ACCESS_KEY = os.getenv("ACCESS_KEY")
+SECRET_ACCESS_KEY = os.getenv("SECRET_ACCESS_KEY")
+PRIMARY_KEY = "blogID"
+
+dynamodb = boto3.resource('dynamodb',
+                          aws_access_key_id = ACCESS_KEY,
+                          aws_secret_access_key = SECRET_ACCESS_KEY,
+                          region_name = "ap-southeast-1"
+)
+table = dynamodb.Table("sustainabox_blogs")
+
+
+#use try except to catch errors when communicating with AWS
+
+#get all items
+def test_get_blogs():
+    blogs = table.scan()
+    print("Here is your data")
+    #print(items["Items"])
+    for blog in blogs["Items"]:
+        print(blog)
+
+#add item
+def test_add_blogs():
+    blog = {
+        "blogID": str(uuid.uuid4()),
+        "userID": "test-user",
+        "description": "first blog added"
+
+        #since dynamodb is noSQL, there is no schema to follow so you can create as many attributes as you want
+        #cons: there may be a mixup mid-creation and not all ddb items will have the same number of columns
+        #pros: you can create new columns without affecting the database
+    }
+    table.put_item(Item = blog)
+    print("blog added! - check aws")
+
+def test_delete_blog():
+    blog_id = input("Enter blog id to delete: ")
+    table.delete_item(
+        Key={
+            PRIMARY_KEY:blog_id
+        }
+    )
+    print("Deleted! - check aws")
+
+def test_update_blog():
+    blog_id = input("Enter blog id to update: ")
+    table.update_item(
+        Key={
+            PRIMARY_KEY: blog_id
+        },
+        UpdateExpression = "set description=:description",
+        ExpressionAttributeValues = {":description": "BLOGOGOGOGOG"}
+    )
+    print("successfully updated blog - check aws")
+
